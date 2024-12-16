@@ -1,13 +1,11 @@
-import './App.css'
+import React from "react";
 import Grid from "./components/Grid.tsx";
 
-function App() {
-
+const App: React.FC = () => {
     return (
-        <>
-            <Grid />
-        </>
-    )
-}
+        <Grid />
+    );
+};
 
-export default App
+export default App;
+

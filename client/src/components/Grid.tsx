@@ -9,15 +9,13 @@ const socket: Socket = io("http://localhost:5000");
 const Grid: React.FC = () => {
     const [gridState, setGridState] = useState<{ [key: string]: string }>({});
     const [playerCount, setPlayerCount] = useState<number>(0);
-    const [playerId, setPlayerId] = useState<string | null>();
+    const [playerId, setPlayerId] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
     const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-    // Listen to Socket.IO events
     useEffect(() => {
-        // Retrieve player ID from localStorage or generate a new one
         let storedPlayerId = localStorage.getItem("playerId");
         if (!storedPlayerId) {
             storedPlayerId = uuidv4();
@@ -25,36 +23,41 @@ const Grid: React.FC = () => {
         }
         setPlayerId(storedPlayerId);
 
-        // Emit the player ID to the server upon connection
         socket.emit("player-connected", storedPlayerId);
 
-        // Get the grid state from localStorage
-        const savedGridState = JSON.parse(localStorage.getItem("gridState") || "{}");
-        setGridState(savedGridState);
-
-        // Retrieve submission state from localStorage
-        const savedIsSubmitted = localStorage.getItem("isSubmitted") === "true";
-        setIsSubmitted(savedIsSubmitted);
-
-        // Get the player count
         socket.on("playerCount", (count: number) => {
             setPlayerCount(count);
         });
 
-        // Listen to the grid state updates from the server
         socket.on("gridState", (updatedGridState: { [key: string]: string }) => {
             setGridState(updatedGridState);
-            // Update localStorage whenever grid state is updated
-            localStorage.setItem("gridState", JSON.stringify(updatedGridState));
         });
+
+        socket.on("submissionStatus", (status: { [key: string]: boolean }) => {
+            const submittedStatus = status[storedPlayerId] || false;
+            setIsSubmitted(submittedStatus);
+            localStorage.setItem("isSubmitted", JSON.stringify(submittedStatus));
+        });
+
+        socket.on("error", (message: string) => {
+            alert(message);
+        });
+
+
+        const storedSubmissionStatus = localStorage.getItem("isSubmitted");
+        if (storedSubmissionStatus) {
+            setIsSubmitted(JSON.parse(storedSubmissionStatus));
+        }
 
         return () => {
             socket.off("gridState");
             socket.off("playerCount");
+            socket.off("submissionStatus");
+            socket.off("error");
         };
     }, []);
 
-    // Handle cell click
+
     const handleCellClick = (row: number, col: number) => {
         if (isSubmitted) {
             alert("You can only submit once!");
@@ -72,22 +75,20 @@ const Grid: React.FC = () => {
     };
 
     const handleSubmit = () => {
+        if (isSubmitted) {
+            alert("You have already submitted your cell value.");
+            return;
+        }
+
         const cellId = `${selectedCell?.row}-${selectedCell?.col}`;
-        socket.emit("updateCell", { cellId, value: inputValue });
+        socket.emit("updateCell", { cellId, value: inputValue, playerId });
 
-        const newGridState = { ...gridState, [cellId]: inputValue };
-        setGridState(newGridState);
-        localStorage.setItem("gridState", JSON.stringify(newGridState));
-
-        // Set the submission state to true and persist it
         setIsSubmitted(true);
-        localStorage.setItem("isSubmitted", "true");
-
         setIsModalOpen(false);
         setInputValue("");
+        localStorage.setItem("isSubmitted", JSON.stringify(true));
     };
 
-    // Generate the grid UI
     const generateGrid = () => {
         const rows = [];
         for (let row = 0; row < 10; row++) {
