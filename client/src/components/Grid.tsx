@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import { v4 as uuidv4 } from "uuid";
+import React, {useEffect, useState} from "react";
+import {io, Socket} from "socket.io-client";
+import {v4 as uuidv4} from "uuid";
 import "./Grid.css";
 import PopupInputField from "./PopupInputField.tsx";
+import toast, {Toaster} from "react-hot-toast";
 
 const socket: Socket = io("http://localhost:5000");
 
@@ -40,7 +41,7 @@ const Grid: React.FC = () => {
         });
 
         socket.on("error", (message: string) => {
-            alert(message);
+            toast(message);
         });
 
 
@@ -60,28 +61,28 @@ const Grid: React.FC = () => {
 
     const handleCellClick = (row: number, col: number) => {
         if (isSubmitted) {
-            alert("You can only submit once!");
+            toast("You can only submit once!");
             return;
         }
 
         const cellId = `${row}-${col}`;
         if (gridState[cellId]) {
-            alert("This cell is already filled!");
+            toast("This cell is already filled!");
             return;
         }
 
-        setSelectedCell({ row: row, col: col });
+        setSelectedCell({row: row, col: col});
         setIsModalOpen(true);
     };
 
     const handleSubmit = () => {
         if (isSubmitted) {
-            alert("You have already submitted your cell value.");
+            toast("You have already submitted your cell value.");
             return;
         }
 
         const cellId = `${selectedCell?.row}-${selectedCell?.col}`;
-        socket.emit("updateCell", { cellId, value: inputValue, playerId });
+        socket.emit("updateCell", {cellId, value: inputValue, playerId});
 
         setIsSubmitted(true);
         setIsModalOpen(false);
@@ -120,7 +121,7 @@ const Grid: React.FC = () => {
             <p>Players Online: {playerCount}</p>
             <p>Player Id: {playerId}</p>
             <div className="grid">{generateGrid()}</div>
-            {isModalOpen && <div className="modal-backdrop" />}
+            {isModalOpen && <div className="modal-backdrop"/>}
             <PopupInputField
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
@@ -128,6 +129,7 @@ const Grid: React.FC = () => {
                 setInputValue={setInputValue}
                 handleSubmit={handleSubmit}
             />
+            <Toaster />
         </div>
     );
 };
