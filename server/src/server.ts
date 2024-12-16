@@ -8,7 +8,6 @@ const setupSocketIO = (httpServer: HttpServer) => {
 
     let playerCount = 0;
     const gridState: { [key: string]: string } = {};
-    const playerCooldowns: { [key: string]: number } = {}; // Store cooldown end timestamps
 
     const shutdownServerAfterInactivity = () => {
         setTimeout(() => {
@@ -28,29 +27,9 @@ const setupSocketIO = (httpServer: HttpServer) => {
         socket.emit("gridState", gridState);
 
         socket.on("updateCell", ({ cellId, value, playerId }) => {
-            const currentTime = Date.now();
-            const cooldownEnd = playerCooldowns[playerId] || 0;
-
-            if (cooldownEnd > currentTime) {
-                const remainingTime = Math.ceil((cooldownEnd - currentTime) / 1000);
-                socket.emit("cooldown", { remainingTime });
-                return;
-            }
-
-            // Update grid and set cooldown
             gridState[cellId] = value;
-            playerCooldowns[playerId] = currentTime + 60 * 1000; // Set 60s cooldown
             io.emit("gridState", gridState);
 
-            const remainingTime = 60; // Cooldown duration
-            socket.emit("cooldown", { remainingTime });
-        });
-
-        socket.on("checkCooldown", (playerId) => {
-            const currentTime = Date.now();
-            const cooldownEnd = playerCooldowns[playerId] || 0;
-            const remainingTime = Math.max(0, Math.ceil((cooldownEnd - currentTime) / 1000));
-            socket.emit("cooldown", { remainingTime });
         });
 
         socket.on("disconnect", () => {

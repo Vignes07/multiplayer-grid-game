@@ -17,6 +17,7 @@ const Grid: React.FC = () => {
     const [cooldown, setCooldown] = useState<number>(0);
 
     useEffect(() => {
+        // Load or generate the player ID
         let storedPlayerId = localStorage.getItem("playerId");
         if (!storedPlayerId) {
             storedPlayerId = uuidv4();
@@ -26,6 +27,7 @@ const Grid: React.FC = () => {
 
         socket.emit("player-connected", storedPlayerId);
 
+        // Listen for updates
         socket.on("playerCount", (count: number) => {
             setPlayerCount(count);
         });
@@ -34,19 +36,18 @@ const Grid: React.FC = () => {
             setGridState(updatedGridState);
         });
 
-        socket.on("cooldown", ({ remainingTime }: { remainingTime: number }) => {
-            setCooldown(remainingTime);
+        // Check cooldown on load
+        const cooldownEndTime = localStorage.getItem(`cooldownEndTime_${storedPlayerId}`);
+        if (cooldownEndTime) {
+            const remainingTime = Math.max(0, Math.ceil((+cooldownEndTime - Date.now()) / 1000));
             if (remainingTime > 0) {
                 startCooldownTimer(remainingTime);
             }
-        });
-
-        socket.emit("checkCooldown", storedPlayerId); // Check cooldown on load
+        }
 
         return () => {
             socket.off("gridState");
             socket.off("playerCount");
-            socket.off("cooldown");
         };
     }, []);
 
@@ -90,6 +91,12 @@ const Grid: React.FC = () => {
 
         setIsModalOpen(false);
         setInputValue("");
+
+        // Set cooldown
+        const cooldownDuration = 60 * 1000; // 60 seconds
+        const cooldownEndTime = Date.now() + cooldownDuration;
+        localStorage.setItem(`cooldownEndTime_${playerId}`, cooldownEndTime.toString());
+        startCooldownTimer(60); // Start 60-second timer
     };
 
     const generateGrid = () => {
