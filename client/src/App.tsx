@@ -7,7 +7,7 @@ import PlayerDetails from "./components/PlayerDetails/PlayerDetails.tsx";
 import CountDownTimer from "./components/CountDownTimer/CountDownTimer.tsx";
 import UpdateHistory from "./components/UpdateHistory/UpdateHistory.tsx";
 
-const socket: Socket = io("http://localhost:5000");
+const socket: Socket = io(import.meta.env.VITE_APP_SOCKET_URL as string);
 
 const App: React.FC = () => {
 
