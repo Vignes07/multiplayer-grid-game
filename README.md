@@ -1,4 +1,4 @@
-# Vite React App
+# Multiplayer Grid Game
 This is a React application bootstrapped with Vite, a fast and lightweight build tool. This project includes a multiplayer grid feature with real-time updates via Socket.IO.
 
 ## Requirements
