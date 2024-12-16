@@ -30,6 +30,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    height: 100vh;
 }
 
 .input-container {
@@ -43,6 +44,10 @@
 
 .grid-button {
     height: 2rem;
+}
+
+.game-title {
+    font: bolder 2rem monospace, sans-serif;
 }
 
 .modal-backdrop {

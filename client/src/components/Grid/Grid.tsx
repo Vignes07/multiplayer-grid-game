@@ -1,10 +1,9 @@
 import React from "react";
-import PopupInputField from "./PopupInputField.tsx";
+import PopupModal from "../PopupModal/PopupModal.tsx";
 import "./Grid.css";
+import {Toaster} from "react-hot-toast";
 
 interface GridProps {
-    playerId: string | null;
-    playerCount: number;
     cooldown: number;
     gridState: { [key: string]: string };
     inputValue: string;
@@ -16,8 +15,6 @@ interface GridProps {
 }
 
 const Grid: React.FC<GridProps> = ({
-                                       playerId,
-                                       playerCount,
                                        cooldown,
                                        gridState,
                                        inputValue,
@@ -54,19 +51,17 @@ const Grid: React.FC<GridProps> = ({
 
     return (
         <div className="grid-container">
-            <h2>Multiplayer Grid</h2>
-            <p>Players Online: {playerCount}</p>
-            <p>Player Id: {playerId}</p>
-            {cooldown > 0 && <p>Cooldown: {cooldown} seconds remaining</p>}
+            <h2 className="game-title">MULTIPLAYER GRID GAME</h2>
             <div className="grid">{generateGrid()}</div>
             {isModalOpen && <div className="modal-backdrop" />}
-            <PopupInputField
+            <PopupModal
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
                 inputValue={inputValue}
                 setInputValue={setInputValue}
                 handleSubmit={handleSubmit}
             />
+            <Toaster />
         </div>
     );
 };

@@ -1,0 +1,6 @@
+.details {
+    position: absolute;
+    top: 0;
+    padding: 1rem;
+    font: bold 14px monospace, sans-serif;
+}

@@ -1,0 +1,7 @@
+.update-history {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+    font: bold 1rem monospace, sans-serif;
+}

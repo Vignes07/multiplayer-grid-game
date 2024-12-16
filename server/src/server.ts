@@ -8,6 +8,8 @@ const setupSocketIO = (httpServer: HttpServer) => {
 
     let playerCount = 0;
     const gridState: { [key: string]: string } = {};
+    const playerConnections: { [playerId: string]: Set<string> } = {};
+
 
     const shutdownServerAfterInactivity = () => {
         setTimeout(() => {
@@ -19,14 +21,22 @@ const setupSocketIO = (httpServer: HttpServer) => {
     };
 
     io.on("connection", (socket) => {
-        playerCount++;
-        io.emit("playerCount", playerCount);
+
+        socket.on("player-connected", (playerId: string) => {
+            if (!playerConnections[playerId]) {
+                playerConnections[playerId] = new Set();
+            }
+            playerConnections[playerId].add(socket.id);
+
+            io.emit("playerCount", Object.keys(playerConnections).length);
+            console.log(`Player Connected: ${playerId}`);
+        });
 
         console.log(`Player Connected: ${socket.id}`);
 
         socket.emit("gridState", gridState);
 
-        socket.on("updateCell", ({ cellId, value, playerId }) => {
+        socket.on("updateCell", ({ cellId, value }) => {
             gridState[cellId] = value;
             io.emit("gridState", gridState);
 

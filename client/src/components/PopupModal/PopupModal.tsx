@@ -1,4 +1,4 @@
-import "./PopupInputField.css"
+import "./PopupModal.css"
 
 type inputProps = {
     isModalOpen: boolean,
@@ -8,7 +8,7 @@ type inputProps = {
     handleSubmit: Function,
 }
 
-function PopupInputField({ isModalOpen, setIsModalOpen, inputValue, setInputValue, handleSubmit }: inputProps ) {
+function PopupModal({ isModalOpen, setIsModalOpen, inputValue, setInputValue, handleSubmit }: inputProps ) {
 
     return (
         <>
@@ -44,4 +44,4 @@ function PopupInputField({ isModalOpen, setIsModalOpen, inputValue, setInputValu
     );
 }
 
-export default PopupInputField;
+export default PopupModal;

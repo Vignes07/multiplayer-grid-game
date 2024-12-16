@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from "react";
-import Grid from "./components/Grid.tsx";
+import Grid from "./components/Grid/Grid.tsx";
 import {v4 as uuidv4} from "uuid";
-
 import {io, Socket} from "socket.io-client";
-
 import toast from "react-hot-toast";
+import PlayerDetails from "./components/PlayerDetails/PlayerDetails.tsx";
+import CountDownTimer from "./components/CountDownTimer/CountDownTimer.tsx";
+import UpdateHistory from "./components/UpdateHistory/UpdateHistory.tsx";
 
 const socket: Socket = io("http://localhost:5000");
 
@@ -102,9 +103,14 @@ const App: React.FC = () => {
     };
 
     return (
-        <Grid playerId={playerId} playerCount={playerCount} cooldown={cooldown} gridState={gridState}
-              inputValue={inputValue} setInputValue={setInputValue} isModalOpen={isModalOpen}
-              setIsModalOpen={setIsModalOpen} handleCellClick={handleCellClick} handleSubmit={handleSubmit}/>
+        <>
+            <Grid cooldown={cooldown} gridState={gridState}
+                  inputValue={inputValue} setInputValue={setInputValue} isModalOpen={isModalOpen}
+                  setIsModalOpen={setIsModalOpen} handleCellClick={handleCellClick} handleSubmit={handleSubmit}/>
+            <PlayerDetails playerId={playerId} playerCount={playerCount} />
+            <CountDownTimer cooldown={cooldown} />
+            <UpdateHistory gridState={gridState} />
+        </>
     );
 };
 
