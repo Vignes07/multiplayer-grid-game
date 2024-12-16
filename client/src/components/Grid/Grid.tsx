@@ -15,7 +15,7 @@ interface GridProps {
 }
 
 const Grid: React.FC<GridProps> = ({
-                                       cooldown,
+
                                        gridState,
                                        inputValue,
                                        setInputValue,
