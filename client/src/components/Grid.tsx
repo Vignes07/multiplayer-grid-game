@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {io, Socket} from "socket.io-client";
-import {v4 as uuidv4} from "uuid";
+import React, { useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
 import "./Grid.css";
 import PopupInputField from "./PopupInputField.tsx";
-import toast, {Toaster} from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 const socket: Socket = io("http://localhost:5000");
 
@@ -14,7 +14,7 @@ const Grid: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
     const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
-    const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [cooldown, setCooldown] = useState<number>(0);
 
     useEffect(() => {
         let storedPlayerId = localStorage.getItem("playerId");
@@ -34,34 +34,38 @@ const Grid: React.FC = () => {
             setGridState(updatedGridState);
         });
 
-        socket.on("submissionStatus", (status: { [key: string]: boolean }) => {
-            const submittedStatus = status[storedPlayerId] || false;
-            setIsSubmitted(submittedStatus);
-            localStorage.setItem("isSubmitted", JSON.stringify(submittedStatus));
+        socket.on("cooldown", ({ remainingTime }: { remainingTime: number }) => {
+            setCooldown(remainingTime);
+            if (remainingTime > 0) {
+                startCooldownTimer(remainingTime);
+            }
         });
 
-        socket.on("error", (message: string) => {
-            toast(message);
-        });
-
-
-        const storedSubmissionStatus = localStorage.getItem("isSubmitted");
-        if (storedSubmissionStatus) {
-            setIsSubmitted(JSON.parse(storedSubmissionStatus));
-        }
+        socket.emit("checkCooldown", storedPlayerId); // Check cooldown on load
 
         return () => {
             socket.off("gridState");
             socket.off("playerCount");
-            socket.off("submissionStatus");
-            socket.off("error");
+            socket.off("cooldown");
         };
     }, []);
 
+    const startCooldownTimer = (duration: number) => {
+        setCooldown(duration);
+        const interval = setInterval(() => {
+            setCooldown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+    };
 
     const handleCellClick = (row: number, col: number) => {
-        if (isSubmitted) {
-            toast("You can only submit once!");
+        if (cooldown > 0) {
+            toast(`Wait for ${cooldown} seconds`);
             return;
         }
 
@@ -71,23 +75,21 @@ const Grid: React.FC = () => {
             return;
         }
 
-        setSelectedCell({row: row, col: col});
+        setSelectedCell({ row: row, col: col });
         setIsModalOpen(true);
     };
 
     const handleSubmit = () => {
-        if (isSubmitted) {
-            toast("You have already submitted your cell value.");
+        if (cooldown > 0) {
+            toast(`Wait for ${cooldown} seconds`);
             return;
         }
 
         const cellId = `${selectedCell?.row}-${selectedCell?.col}`;
-        socket.emit("updateCell", {cellId, value: inputValue, playerId});
+        socket.emit("updateCell", { cellId, value: inputValue, playerId });
 
-        setIsSubmitted(true);
         setIsModalOpen(false);
         setInputValue("");
-        localStorage.setItem("isSubmitted", JSON.stringify(true));
     };
 
     const generateGrid = () => {
@@ -120,8 +122,9 @@ const Grid: React.FC = () => {
             <h2>Multiplayer Grid</h2>
             <p>Players Online: {playerCount}</p>
             <p>Player Id: {playerId}</p>
+            {cooldown > 0 && <p>Cooldown: {cooldown} seconds remaining</p>}
             <div className="grid">{generateGrid()}</div>
-            {isModalOpen && <div className="modal-backdrop"/>}
+            {isModalOpen && <div className="modal-backdrop" />}
             <PopupInputField
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
