@@ -13,7 +13,7 @@ Follow the steps below to set up and run the app locally.
 ### 1. Clone the repo
 
 ```bash
-  git clone https://github.com/Vignes07/candidate-app.git
+  git clone https://github.com/Vignes07/multiplayer-grid-game.git
 ```
 ```bash
    cd multiplayer-grid-game
