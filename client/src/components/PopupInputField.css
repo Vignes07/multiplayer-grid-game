@@ -1,0 +1,47 @@
+.modal {
+    z-index: 999;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 0 49px -8px rgba(0,0,0,0.75);
+    border-radius: 10px;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem;
+    gap: 1rem;
+}
+
+.input-field {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.input-field > input, .input-field > button {
+    border-radius: 10px;
+    border: gray 1px solid;
+    padding: 10px;
+}
+
+.input-field > button {
+    cursor: pointer;
+}
+
+.input-field > input:focus {
+    outline: none;
+    border: gray 1px solid;
+}
+
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+}
+
+.close > button {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
