@@ -4,7 +4,7 @@ interface CountDownTimerProps {
     cooldown: number;
 }
 
-function CountDownTimer({cooldown}: CountDownTimerProps): JSX.Element {
+function CountDownTimer({cooldown}: CountDownTimerProps) {
     return (
         <div className="countdown">
             {cooldown ? <div className="countdown-number">{cooldown}</div> : ""}
